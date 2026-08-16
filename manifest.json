@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "SnapFull - Full Page Screen Capture",
+  "version": "1.0.0",
+  "description": "Capture full web pages, visible areas, or elements. Annotate, crop, blur, and export to PNG, JPEG, PDF or clipboard instantly.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SnapFull - Capture Screenshot",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "unlimitedStorage",
+    "downloads",
+    "tabs"
+  ],
+  "commands": {
+    "capture-full-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "Capture entire full webpage"
+    },
+    "capture-visible": {
+      "suggested_key": {
+        "default": "Alt+Shift+V"
+      },
+      "description": "Capture visible viewport"
+    },
+    "capture-selected": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Capture selected region"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*",
+        "viewer.html",
+        "viewer.css",
+        "viewer.js",
+        "storage-db.js",
+        "pdf-export.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

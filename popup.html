@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapFull - Full Page Screen Capture</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>SnapFull</h1>
+          <span class="brand-badge">PRO</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-tab-capture" class="tab-btn active" title="Capture Modes">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M2 12h20"></path>
+          </svg>
+        </button>
+        <button id="btn-tab-history" class="tab-btn" title="Recent History">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+        <button id="btn-tab-settings" class="tab-btn" title="Capture Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner hidden">
+      <span id="error-message"></span>
+    </div>
+
+    <!-- Active Capture View -->
+    <main id="view-capture" class="view-panel active">
+      <!-- Delay Selector -->
+      <div class="delay-bar">
+        <span class="delay-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Timer:
+        </span>
+        <div class="timer-pills" id="timer-group">
+          <button class="pill active" data-delay="0">Instant</button>
+          <button class="pill" data-delay="3">3s</button>
+          <button class="pill" data-delay="5">5s</button>
+          <button class="pill" data-delay="10">10s</button>
+        </div>
+      </div>
+
+      <!-- Capture Modes Grid -->
+      <div class="modes-grid">
+        <!-- Full Page Card (Hero) -->
+        <button id="btn-capture-full" class="mode-card hero-card">
+          <div class="mode-icon-wrapper hero-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="3" y1="15" x2="21" y2="15"></line>
+              <line x1="12" y1="9" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="mode-info">
+            <div class="mode-title-row">
+              <span class="mode-title">Full Webpage</span>
+              <span class="shortcut-tag">Alt+Shift+F</span>
+            </div>
+            <p class="mode-desc">Scrolls & seamlessly captures the entire page from top to bottom</p>
+          </div>
+          <div class="hero-glow"></div>
+        </button>
+
+        <!-- Visible Area Card -->
+        <button id="btn-capture-visible" class="mode-card">
+          <div class="mode-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="mode-info">
+            <div class="mode-title-row">
+              <span class="mode-title">Visible Area</span>
+              <span class="shortcut-tag">Alt+Shift+V</span>
+            </div>
+            <p class="mode-desc">Capture current visible screen</p>
+          </div>
+        </button>
+
+        <!-- Selected Region Card -->
+        <button id="btn-capture-region" class="mode-card">
+          <div class="mode-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2v14a2 2 0 0 0 2 2h14"></path>
+              <path d="M18 22V8a2 2 0 0 0-2-2H2"></path>
+            </svg>
+          </div>
+          <div class="mode-info">
+            <div class="mode-title-row">
+              <span class="mode-title">Selected Region</span>
+              <span class="shortcut-tag">Alt+Shift+S</span>
+            </div>
+            <p class="mode-desc">Drag crosshairs to crop an area</p>
+          </div>
+        </button>
+
+        <!-- Selected Element Card -->
+        <button id="btn-capture-element" class="mode-card">
+          <div class="mode-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="22" y1="12" x2="18" y2="12"></line>
+              <line x1="6" y1="12" x2="2" y2="12"></line>
+              <line x1="12" y1="6" x2="12" y2="2"></line>
+              <line x1="12" y1="22" x2="12" y2="18"></line>
+            </svg>
+          </div>
+          <div class="mode-info">
+            <div class="mode-title-row">
+              <span class="mode-title">DOM Element</span>
+              <span class="badge-subtle">Hover & Click</span>
+            </div>
+            <p class="mode-desc">Target specific card, banner, or table</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Quick Action Setting Bar -->
+      <div class="quick-setting-bar">
+        <label class="setting-inline">
+          <span>After Capture:</span>
+          <select id="select-post-action" class="custom-select">
+            <option value="editor">Open Studio Editor</option>
+            <option value="download">Auto Download PNG</option>
+          </select>
+        </label>
+      </div>
+    </main>
+
+    <!-- History Gallery View -->
+    <section id="view-history" class="view-panel">
+      <div class="panel-header">
+        <h2>Recent Captures</h2>
+        <button id="btn-clear-history" class="text-btn">Clear All</button>
+      </div>
+      <div id="history-list" class="history-list">
+        <!-- Rendered dynamically -->
+        <div class="empty-state">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <p>No screenshots taken yet</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="view-settings" class="view-panel">
+      <div class="panel-header">
+        <h2>Capture Settings</h2>
+      </div>
+      
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-text">
+            <span class="setting-name">Hide Sticky / Fixed Headers</span>
+            <span class="setting-hint">Hides duplicate repeating headers during full page scroll</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-hide-fixed" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <span class="setting-name">Scroll Settle Delay</span>
+            <span class="setting-hint">Time allowed for lazy loaded images and animations to render</span>
+          </div>
+          <select id="setting-scroll-delay" class="custom-select">
+            <option value="120">Fast (120ms)</option>
+            <option value="250" selected>Normal (250ms)</option>
+            <option value="500">Smooth / Lazy Load (500ms)</option>
+            <option value="800">Slow (800ms)</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <span class="setting-name">Default Export Format</span>
+            <span class="setting-hint">Default format when saving directly</span>
+          </div>
+          <select id="setting-default-format" class="custom-select">
+            <option value="png" selected>PNG (Lossless)</option>
+            <option value="jpeg">JPEG (High Quality)</option>
+            <option value="pdf">PDF Document</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="shortcuts-box">
+        <span class="shortcuts-title">Keyboard Shortcuts</span>
+        <div class="shortcut-item">
+          <span>Capture Full Page</span>
+          <kbd>Alt + Shift + F</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Capture Visible Screen</span>
+          <kbd>Alt + Shift + V</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Capture Selected Area</span>
+          <kbd>Alt + Shift + S</kbd>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <span class="footer-hint">SnapFull Studio v1.0 &bull; 100% Offline & Private</span>
+    </footer>
+  </div>
+
+  <script src="storage-db.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

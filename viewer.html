@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapFull Studio - Screenshot Editor</title>
+  <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+  <div class="studio-app">
+    <!-- Top Header Bar -->
+    <header class="studio-header">
+      <div class="header-left">
+        <div class="app-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span class="logo-title">SnapFull Studio</span>
+        </div>
+
+        <div class="document-info">
+          <h1 id="doc-title" class="doc-title">Webpage Screenshot</h1>
+          <div class="doc-meta">
+            <span id="doc-dims" class="meta-pill">0 × 0 px</span>
+            <a id="doc-url" class="meta-link" href="#" target="_blank" rel="noreferrer"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zoom and Canvas Navigation -->
+      <div class="header-center">
+        <div class="zoom-controls">
+          <button id="btn-zoom-out" class="icon-btn" title="Zoom Out (Ctrl -)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <span id="zoom-level" class="zoom-text">100%</span>
+          <button id="btn-zoom-in" class="icon-btn" title="Zoom In (Ctrl +)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button id="btn-zoom-fit" class="pill-btn" title="Fit to Screen">Fit</button>
+          <button id="btn-zoom-100" class="pill-btn" title="Actual Size">100%</button>
+        </div>
+
+        <div class="history-controls">
+          <button id="btn-undo" class="icon-btn" title="Undo (Ctrl+Z)" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7v6h6"></path>
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            </svg>
+          </button>
+          <button id="btn-redo" class="icon-btn" title="Redo (Ctrl+Y)" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 7v6h-6"></path>
+              <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+            </svg>
+          </button>
+          <button id="btn-clear-annotations" class="pill-btn danger" title="Clear all drawings">Clear</button>
+        </div>
+      </div>
+
+      <!-- Action & Export Buttons -->
+      <div class="header-right">
+        <button id="btn-copy-clipboard" class="action-btn secondary" title="Copy to Clipboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Copy Image</span>
+        </button>
+
+        <div class="dropdown-wrapper">
+          <button id="btn-export-dropdown" class="action-btn primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Save / Export</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div id="export-menu" class="dropdown-menu">
+            <button id="export-png" class="menu-item">
+              <div class="menu-icon">PNG</div>
+              <div class="menu-text">
+                <span class="menu-label">Download PNG</span>
+                <span class="menu-sub">Lossless quality screenshot</span>
+              </div>
+            </button>
+            <button id="export-jpg" class="menu-item">
+              <div class="menu-icon">JPG</div>
+              <div class="menu-text">
+                <span class="menu-label">Download JPEG</span>
+                <span class="menu-sub">Compressed lightweight file</span>
+              </div>
+            </button>
+            <div class="menu-divider"></div>
+            <button id="export-pdf-single" class="menu-item">
+              <div class="menu-icon pdf">PDF</div>
+              <div class="menu-text">
+                <span class="menu-label">PDF (Continuous Page)</span>
+                <span class="menu-sub">Single full-height document</span>
+              </div>
+            </button>
+            <button id="export-pdf-a4" class="menu-item">
+              <div class="menu-icon pdf">PDF</div>
+              <div class="menu-text">
+                <span class="menu-label">PDF (A4 Paginated)</span>
+                <span class="menu-sub">Multi-page print ready document</span>
+              </div>
+            </button>
+            <div class="menu-divider"></div>
+            <button id="btn-print" class="menu-item">
+              <div class="menu-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+              </div>
+              <div class="menu-text">
+                <span class="menu-label">Print Screenshot</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="studio-workspace">
+      <!-- Floating Left Toolbar -->
+      <aside class="studio-toolbar">
+        <div class="tool-group">
+          <!-- Pan / Select -->
+          <button class="tool-btn active" data-tool="pan" title="Pan / Navigate (Hold Spacebar)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="5 9 2 12 5 15"></polyline>
+              <polyline points="9 5 12 2 15 5"></polyline>
+              <polyline points="15 19 12 22 9 19"></polyline>
+              <polyline points="19 9 22 12 19 15"></polyline>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <line x1="12" y1="2" x2="12" y2="22"></line>
+            </svg>
+          </button>
+
+          <!-- Crop -->
+          <button class="tool-btn" data-tool="crop" title="Crop Screenshot">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2v14a2 2 0 0 0 2 2h14"></path>
+              <path d="M18 22V8a2 2 0 0 0-2-2H2"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group">
+          <!-- Rectangle -->
+          <button class="tool-btn" data-tool="rectangle" title="Rectangle Box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            </svg>
+          </button>
+
+          <!-- Circle / Ellipse -->
+          <button class="tool-btn" data-tool="circle" title="Circle / Ellipse">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+          </button>
+
+          <!-- Arrow -->
+          <button class="tool-btn" data-tool="arrow" title="Arrow Pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="19" x2="19" y2="5"></line>
+              <polyline points="10 5 19 5 19 14"></polyline>
+            </svg>
+          </button>
+
+          <!-- Line -->
+          <button class="tool-btn" data-tool="line" title="Straight Line">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="20" x2="20" y2="4"></line>
+            </svg>
+          </button>
+
+          <!-- Pen (Freehand) -->
+          <button class="tool-btn" data-tool="pen" title="Pen (Freehand)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+              <path d="M2 2l7.586 7.586"></path>
+              <circle cx="11" cy="11" r="2"></circle>
+            </svg>
+          </button>
+
+          <!-- Highlighter -->
+          <button class="tool-btn" data-tool="highlighter" title="Highlighter Marker">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m9 11-6 6v3h3l6-6"></path>
+              <path d="m22 2-4.5 4.5"></path>
+              <path d="m13.5 6.5 4 4"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group">
+          <!-- Text -->
+          <button class="tool-btn" data-tool="text" title="Add Text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 7 4 4 20 4 20 7"></polyline>
+              <line x1="9" y1="20" x2="15" y2="20"></line>
+              <line x1="12" y1="4" x2="12" y2="20"></line>
+            </svg>
+          </button>
+
+          <!-- Numbered Step Badge -->
+          <button class="tool-btn" data-tool="badge" title="Numbered Step Badge (1, 2, 3...)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <text x="12" y="16" font-size="12" font-weight="bold" fill="currentColor" text-anchor="middle">1</text>
+            </svg>
+          </button>
+
+          <!-- Blur / Redact / Pixelate -->
+          <button class="tool-btn" data-tool="blur" title="Blur / Redact Sensitive Info">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 12h20"></path>
+              <path d="M20 12v8H4v-8"></path>
+              <rect x="6" y="15" width="2" height="2"></rect>
+              <rect x="11" y="15" width="2" height="2"></rect>
+              <rect x="16" y="15" width="2" height="2"></rect>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Floating Properties Bar (Colors & Widths) -->
+      <div id="properties-bar" class="properties-bar">
+        <!-- Color Palette -->
+        <div class="prop-group colors">
+          <span class="prop-label">Color:</span>
+          <div class="color-palette" id="color-palette">
+            <button class="color-dot active" data-color="#f43f5e" style="background:#f43f5e;"></button>
+            <button class="color-dot" data-color="#f97316" style="background:#f97316;"></button>
+            <button class="color-dot" data-color="#eab308" style="background:#eab308;"></button>
+            <button class="color-dot" data-color="#10b981" style="background:#10b981;"></button>
+            <button class="color-dot" data-color="#06b6d4" style="background:#06b6d4;"></button>
+            <button class="color-dot" data-color="#6366f1" style="background:#6366f1;"></button>
+            <button class="color-dot" data-color="#a855f7" style="background:#a855f7;"></button>
+            <button class="color-dot" data-color="#0f172a" style="background:#0f172a;"></button>
+            <button class="color-dot" data-color="#ffffff" style="background:#ffffff;"></button>
+            <input type="color" id="custom-color-picker" class="custom-color" value="#f43f5e">
+          </div>
+        </div>
+
+        <div class="prop-divider"></div>
+
+        <!-- Stroke Width -->
+        <div class="prop-group" id="group-stroke-width">
+          <span class="prop-label">Width:</span>
+          <div class="width-selector" id="width-group">
+            <button class="width-btn" data-width="2"><span class="line-sample" style="height:2px;"></span></button>
+            <button class="width-btn active" data-width="4"><span class="line-sample" style="height:4px;"></span></button>
+            <button class="width-btn" data-width="8"><span class="line-sample" style="height:7px;"></span></button>
+            <button class="width-btn" data-width="14"><span class="line-sample" style="height:12px;"></span></button>
+          </div>
+        </div>
+
+        <!-- Font Size for Text -->
+        <div class="prop-group hidden" id="group-font-size">
+          <span class="prop-label">Size:</span>
+          <select id="select-font-size" class="prop-select">
+            <option value="16">16px</option>
+            <option value="22" selected>22px</option>
+            <option value="32">32px</option>
+            <option value="48">48px</option>
+          </select>
+        </div>
+
+        <!-- Crop Apply / Cancel Controls -->
+        <div class="prop-group hidden" id="group-crop-actions">
+          <button id="btn-apply-crop" class="action-btn success-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Apply Crop</span>
+          </button>
+          <button id="btn-cancel-crop" class="action-btn cancel-sm">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Canvas Viewport Area -->
+      <main id="canvas-viewport" class="canvas-viewport">
+        <div id="canvas-stage" class="canvas-stage">
+          <canvas id="main-canvas" class="main-canvas"></canvas>
+          <canvas id="annotation-canvas" class="annotation-canvas"></canvas>
+          <div id="crop-overlay" class="crop-overlay hidden">
+            <div id="crop-box" class="crop-box">
+              <div class="crop-handle nw"></div>
+              <div class="crop-handle ne"></div>
+              <div class="crop-handle sw"></div>
+              <div class="crop-handle se"></div>
+              <div class="crop-handle n"></div>
+              <div class="crop-handle s"></div>
+              <div class="crop-handle w"></div>
+              <div class="crop-handle e"></div>
+              <span id="crop-dims" class="crop-dims">0 × 0 px</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+      <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span id="toast-message">Copied to clipboard!</span>
+    </div>
+  </div>
+
+  <script src="storage-db.js"></script>
+  <script src="pdf-export.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>
