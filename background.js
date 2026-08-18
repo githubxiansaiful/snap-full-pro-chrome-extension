@@ -113,6 +113,12 @@ async function startCapture(tab, options = {}) {
     throw new Error('Chrome extensions cannot capture internal browser pages (chrome://, webstore, etc.). Please switch to a regular website.');
   }
 
+  // Prevent concurrent captures on the same tab
+  if (activeCaptures.has(tab.id)) {
+    console.warn('A capture is already running on this tab.');
+    return { id: activeCaptures.get(tab.id)?.id };
+  }
+
   // Ensure content script & styles are injected
   await ensureContentScript(tab.id);
 
@@ -146,6 +152,8 @@ async function startCapture(tab, options = {}) {
       }
 
       case 'visible': {
+        // Small pause for popup closure and smooth screen rendering
+        await wait(150);
         await chrome.tabs.sendMessage(tab.id, { action: 'FLASH_SCREEN' }).catch(() => {});
         const sliceDataUrl = await captureVisibleTabPromise(tab.windowId);
         const imgBitmap = await dataUrlToBitmap(sliceDataUrl);
@@ -232,6 +240,15 @@ async function startCapture(tab, options = {}) {
     }
 
     return { id: captureId };
+  } catch (err) {
+    console.error('Capture failed:', err);
+    if (tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, {
+        action: 'SHOW_ERROR_TOAST',
+        error: err.message || 'Capture failed'
+      }).catch(() => {});
+    }
+    throw err;
   } finally {
     activeCaptures.delete(tab.id);
   }
@@ -246,7 +263,7 @@ async function captureFullPageFlow(tab, options, captureId) {
     action: 'PREPARE_FULL_PAGE',
     options: {
       hideFixedElements: options.hideFixedElements ?? true,
-      scrollDelay: options.scrollDelay ?? 250
+      scrollDelay: options.scrollDelay ?? 350
     }
   });
 
@@ -305,7 +322,7 @@ async function captureFullPageFlow(tab, options, captureId) {
         totalSteps: slice.totalSteps,
         options: {
           hideFixedElements: options.hideFixedElements ?? true,
-          scrollDelay: options.scrollDelay ?? 250
+          scrollDelay: options.scrollDelay ?? 350
         }
       });
 
@@ -410,21 +427,72 @@ function blobToDataUrl(blob) {
   });
 }
 
+// Rate limiting tracker to prevent MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota violations
+let lastCaptureTime = 0;
+const MIN_CAPTURE_INTERVAL_MS = 600; // Chrome limit is 2 calls/sec (500ms). 600ms guarantees staying safely within quota.
+
 /**
- * Capture Visible Tab Promisified
+ * Throttle capture calls to strictly respect Chrome's MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND
  */
-function captureVisibleTabPromise(windowId) {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-      } else if (!dataUrl) {
-        reject(new Error('Failed to capture tab screenshot'));
-      } else {
-        resolve(dataUrl);
+async function throttleCapture() {
+  const now = Date.now();
+  const elapsed = now - lastCaptureTime;
+  if (elapsed < MIN_CAPTURE_INTERVAL_MS) {
+    const delayNeeded = MIN_CAPTURE_INTERVAL_MS - elapsed;
+    await wait(delayNeeded);
+  }
+  lastCaptureTime = Date.now();
+}
+
+/**
+ * Capture Visible Tab with Rate Limiter & Exponential Backoff Retry on Quota Exceeded
+ */
+async function captureVisibleTabPromise(windowId, maxRetries = 5) {
+  let attempt = 0;
+  let backoffMs = 700;
+
+  while (attempt <= maxRetries) {
+    try {
+      await throttleCapture();
+
+      const dataUrl = await new Promise((resolve, reject) => {
+        chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (res) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else if (!res) {
+            reject(new Error('Failed to capture tab screenshot: received empty image data'));
+          } else {
+            resolve(res);
+          }
+        });
+      });
+
+      return dataUrl;
+    } catch (err) {
+      const errMsg = (err && err.message) ? err.message : '';
+      const isQuotaError = errMsg.includes('MAX_CAPTURE_VISIBLE_TAB') ||
+                           errMsg.includes('quota') ||
+                           errMsg.includes('exceeded') ||
+                           errMsg.includes('per second');
+
+      if (isQuotaError && attempt < maxRetries) {
+        attempt++;
+        console.warn(`[SnapFull] captureVisibleTab quota limit hit (attempt ${attempt}/${maxRetries}), backoff ${backoffMs}ms...`);
+        await wait(backoffMs);
+        backoffMs = Math.round(backoffMs * 1.5);
+        continue;
       }
-    });
-  });
+
+      // If temporary busy error, retry up to 2 times
+      if ((errMsg.includes('internal error') || errMsg.includes('busy')) && attempt < 2) {
+        attempt++;
+        await wait(500);
+        continue;
+      }
+
+      throw err;
+    }
+  }
 }
 
 /**
@@ -475,7 +543,7 @@ async function getSettings() {
   const result = await chrome.storage.local.get(['snapfull_settings']);
   return result.snapfull_settings || {
     postAction: 'editor',
-    scrollDelay: 250,
+    scrollDelay: 350,
     hideFixedElements: true,
     delay: 0
   };

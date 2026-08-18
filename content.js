@@ -68,6 +68,11 @@
         sendResponse({ success: true });
         break;
 
+      case 'SHOW_ERROR_TOAST':
+        showErrorToast(message.error || 'Capture encountered an error');
+        sendResponse({ success: true });
+        break;
+
       default:
         break;
     }
@@ -576,6 +581,34 @@
     setTimeout(() => {
       if (flash.parentNode) flash.parentNode.removeChild(flash);
     }, 450);
+  }
+
+  /**
+   * Display error notification toast on page
+   */
+  function showErrorToast(msg) {
+    removeActiveOverlay();
+    const toast = document.createElement('div');
+    toast.className = 'snapfull-error-toast';
+    toast.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>${escapeHtml(msg)}</span>
+    `;
+    document.documentElement.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 5000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   function removeActiveOverlay() {

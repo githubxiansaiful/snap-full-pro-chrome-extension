@@ -231,6 +231,29 @@
   animation: snapfull-fade-out 0.4s ease-out forwards;
 }
 
+/* Error notification toast */
+.snapfull-error-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(24, 18, 26, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fca5a5;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  z-index: 2147483647;
+  animation: snapfull-slide-down 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Temporary scrollbar hide helper */
 .snapfull-hide-scrollbar::-webkit-scrollbar {
   display: none !important;

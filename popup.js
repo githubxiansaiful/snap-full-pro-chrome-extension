@@ -49,14 +49,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const stored = await chrome.storage.local.get(['snapfull_settings']);
   const settings = stored.snapfull_settings || {
     postAction: 'editor',
-    scrollDelay: 250,
+    scrollDelay: 350,
     hideFixedElements: true,
     defaultFormat: 'png'
   };
 
   selectPostAction.value = settings.postAction || 'editor';
   settingHideFixed.checked = settings.hideFixedElements ?? true;
-  settingScrollDelay.value = String(settings.scrollDelay || 250);
+  settingScrollDelay.value = String(settings.scrollDelay || 350);
   settingDefaultFormat.value = settings.defaultFormat || 'png';
 
   // Save settings on change
@@ -129,37 +129,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       format: settingDefaultFormat.value
     };
 
-    // Close popup immediately if we are doing interactive region/element selection or countdown
-    if (type === 'region' || type === 'element' || selectedDelay > 0) {
-      chrome.runtime.sendMessage({
-        action: 'START_CAPTURE',
-        tab: activeTab,
-        options
-      });
+    // Send capture trigger to background service worker
+    chrome.runtime.sendMessage({
+      action: 'START_CAPTURE',
+      tab: activeTab,
+      options
+    }).catch(err => {
+      console.warn('Capture dispatch:', err);
+    });
+
+    // Close popup immediately so full webpage HUD and elements are visible and not obstructed
+    setTimeout(() => {
       window.close();
-      return;
-    }
-
-    // Otherwise show loading state on button
-    setCapturingState(type, true);
-
-    try {
-      const response = await chrome.runtime.sendMessage({
-        action: 'START_CAPTURE',
-        tab: activeTab,
-        options
-      });
-
-      if (!response || !response.success) {
-        throw new Error(response?.error || 'Capture failed');
-      }
-
-      // Close popup once initiated/completed
-      window.close();
-    } catch (err) {
-      showError(err.message || 'Capture failed');
-      setCapturingState(type, false);
-    }
+    }, 60);
   }
 
   btnCaptureFull.addEventListener('click', () => triggerCapture('full'));
